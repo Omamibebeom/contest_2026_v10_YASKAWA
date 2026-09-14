@@ -1,0 +1,10 @@
+{
+  "profiles": [
+    {"h_min": 170, "h_max": 10, "s_min": 100, "s_max": 255, "v_min": 80, "v_max": 255,
+     "blur": 3, "open_k": 3, "close_k": 5, "min_area": 800, "name": "red"},
+    {"h_min": 95, "h_max": 130, "s_min": 100, "s_max": 255, "v_min": 60, "v_max": 255,
+     "blur": 3, "open_k": 3, "close_k": 5, "min_area": 800, "name": "blue"},
+    {"h_min": 40, "h_max": 80, "s_min": 100, "s_max": 255, "v_min": 60, "v_max": 255,
+     "blur": 3, "open_k": 3, "close_k": 5, "min_area": 800, "name": "green"}
+  ]
+}

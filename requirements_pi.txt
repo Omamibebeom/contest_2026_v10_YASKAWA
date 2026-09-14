@@ -1,0 +1,4 @@
+# 樹莓派套件清單 (整合包實際 import: cv2 / numpy / GPIO)
+numpy>=2.0.2
+opencv-python>=4.11.0.86
+rpi-lgpio ; platform_machine in "armv7l aarch64"
