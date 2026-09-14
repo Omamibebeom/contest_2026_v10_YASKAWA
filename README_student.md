@@ -103,6 +103,7 @@ python3 main_contest.py --practice
 |---|---|---|
 | `LinAlgError: Singular matrix` | 作答區 1 點太少或排成一直線；或作答區 2 寫錯 | 重取點位／檢查公式 |
 | `ValueError: matmul ... mismatch` | PIXELS 和 ARMS 點數不一樣 | 兩份清單數一數 |
+| `io_test.py` 印 `[io] 載入 main_contest 失敗`，畫面顯示 `[auto-off]` | 作答區 1（affine 點位）還沒抄或抄錯，io_test 借用主程式的投票功能時被擋下 | 和接線無關；按鍵測 IO 照常可用，先把作答區 1 修好再重跑就會恢復自動投票 |
 | `[camera] 試過 [0..5] 都讀不到畫面` | 相機沒插好，或被別的程式佔住 | 插好；關掉還開著的 tuner／sample tool |
 | `[camera] 注意: 不是 1280x720` | 相機解析度不對，點位會全錯 | 換回同一台相機再啟動 |
 | `找不到 vision_profiles.json` | 還沒存顏色 | 做第 1 步 |

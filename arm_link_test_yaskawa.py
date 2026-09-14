@@ -1,5 +1,5 @@
 """
-arm_link_test.py —— 只測「樹莓派 ↔ 安川 YRC1000」的通訊 (廠商測機用)
+arm_link_test_yaskawa.py —— 只測「樹莓派 ↔ 安川 YRC1000」的通訊 (廠商測機用)
 
 跟比賽主程式的差別
   不開相機、不讀 vision_profiles.json、不碰 GPIO、不做座標轉換。
@@ -7,11 +7,11 @@ arm_link_test.py —— 只測「樹莓派 ↔ 安川 YRC1000」的通訊 (廠�
   寫入順序, 比賽時完全一樣。
 
 兩種用法
-  python3 arm_link_test.py --selftest    job 還沒寫好時先用: 不需要 job,
-                                         直接讀寫變數, 確認網路與控制器設定都對
-  python3 arm_link_test.py               正常測試: 等 job 把 B001 設成 1,
-                                         就依序給 FAKE_TARGETS 裡的假座標
-  再加 --host 192.168.0.1              臨時指定控制器 IP (不改 arm_link.py)
+  python3 arm_link_test_yaskawa.py --selftest   job 還沒寫好時先用: 不需要 job,
+                                                直接讀寫變數, 確認網路與控制器設定都對
+  python3 arm_link_test_yaskawa.py              正常測試: 等 job 把 B001 設成 1,
+                                                就依序給 FAKE_TARGETS 裡的假座標
+  再加 --host 192.168.0.1                       臨時指定控制器 IP (不改 arm_link.py)
 
 跑之前控制器要先設定好 (詳見 docs/yaskawa_job_interface.txt 第一節)
   1. ETHERNET SERVER 功能開啟
