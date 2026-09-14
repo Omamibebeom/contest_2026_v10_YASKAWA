@@ -21,14 +21,14 @@ IO_CODES = {
     "blue":  (0, 1, 0),
     "green": (0, 1, 1),
 }
-FAIL_CODE = (1, 1, 1)        # 辨識失敗時的 R2 R3 R4 (R1 不拉高); 
+FAIL_CODE = (1, 1, 1)        # 辨識失敗時的 R2 R3 R4 (R1 不拉高); 要選 IO_CODES 沒用到的組合, 才不會和某個顏色只差 R1
 HOLD_SEC = 7                 # R1 拉高後保持幾秒
 FAIL_HOLD_SEC = 10           # 失敗碼保持幾秒 (要比手臂等 R1 的逾時更久)
 # ==========================================================
 
 RELAY_PINS = [17, 27, 22, 23]   # R1 R2 R3 R4 接的 GPIO (BCM 編號)
 READY_PIN = 26                  # 手臂 DO → 這支腳; 拉高 = 請開始辨識
-INVERSE_LOGIC = True
+INVERSE_LOGIC = True            # True = 這種繼電器板是低電位吸合 (換板子若變成高電位吸合就改 False)
 
 try:
     import RPi.GPIO as GPIO

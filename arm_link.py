@@ -9,7 +9,7 @@ arm_link.py —— 樹莓派 ↔ 安川 YRC1000 手臂通訊 (b 通道: 把座�
   → job 看到 B001 變 0, 先判 B003, 再讀 P002 / P001 去夾
   變數編號固定: B001 旗標 / B003 狀態 / P001 夾取點 / P002 正上方 (job 端要用同樣的編號)
 
-賽前要填的 (下面「賽前設定」區, 三項都要在安川實機上量, 不能沿用別台手臂的數字)
+賽前要填的 (下面「賽前設定」區; 第 2、3 項要在安川實機上量, 不能沿用別台手臂的數字)
   1. HOST                         安川控制器的 IP
   2. COORD_FRAME / RX RY RZ / POSE_TYPE / TOOL_NO
                                   先在 pendant 把手臂 Jog 到「夾取姿態、剛好碰到物件」的點教成 P010,
@@ -62,7 +62,7 @@ REPLY_WAIT_SEC = 5.0        # 等主程式算回覆最多幾秒 (正常不到 0.
 
 # ---------- 主程式用的指令字與回覆 ----------
 CMD_GET = "GET"             # 手臂要座標 (B001 = 1 時由本程式產生)
-CMD_SCAN = "SCAN"           # 以下四個本程式不會產生, 保留給主程式的 handle() 使用
+CMD_SCAN = "SCAN"           # 以下五個本程式不會產生, 保留給主程式的 handle() 使用
 CMD_GRIP = "GRIP"
 CMD_RELEASE = "RELEASE"
 CMD_RESET = "RESET"
