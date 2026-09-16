@@ -95,8 +95,8 @@ class ArmLink:
         self._stop = threading.Event()
         self._thread = None
         self._arm = None
-        self.state = "INIT"             # INIT / POLL / SERVE / ERROR (畫面顯示用)
-        self.note = ""                  # 最近一句訊息 (畫面顯示用)
+        self.state = "INIT"             # INIT / POLL / SERVE / ERROR (_set() 變化時印到終端)
+        self.note = ""                  # 最近一句訊息 (_set() 變化時印到終端)
         self.served = 0                 # 已經給出去幾件
 
     def open(self):

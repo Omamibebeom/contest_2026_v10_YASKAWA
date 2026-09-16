@@ -4,24 +4,22 @@ main_contest.py —— 比賽主程式 (跑在樹莓派)
 兩個通道 (一句話: a 是「這是什麼顏色」, b 是「這個顏色在哪裡」):
   a 通道 (放置板):        手臂從放置板夾起指定物件、舉到鏡頭前 → 程式辨識顏色
                           → 用 IO 訊號告訴手臂是哪個顏色 → 手臂決定放到哪一區
-  b 通道 (隨機位置放置板): 程式開場拍快照, 算出每件物件的手臂座標 → 手臂 job 把 B001 設成 1
-                          → 程式照顏色順序把一件的座標寫進安川 P001/P002 → 手臂去夾
-                          (變數介面與賽前設定見 arm_link.py 頂端; job 流程見 docs/yaskawa_job_interface.txt)
+  b 通道 (隨機位置放置板): 程式開場拍快照, 算出每件物件的手臂座標 → 手臂要下一件座標
+                          → 程式照顏色順序回一件的座標 → 手臂去夾
+                          (手臂「怎麼要、怎麼收」由 arm_link.py 決定, 四家手臂各有一版; 本檔四家相同)
 
 賽前準備 (照順序):
   1. vision_tuner.py        調每個顏色的 HSV, 存進 vision_profiles.json
   2. affine_sample_tool.py  取像素↔手臂點位, 抄進 affine_transform.py
   3. io_test.py             確認 顏色 → IO 訊號 的接線
-  4. arm_link.py 頂端       填安川 IP; 用 --read-p 抄座標系/姿態/Tool; 量 Z_PICK / Z_SAFE
-  5. 填好下面的 PICK_ORDER (pi_gpio_controller.py 的 IO_CODES 也要填)
+  4. 填好下面的 PICK_ORDER (pi_gpio_controller.py 的 IO_CODES 也要填)
 
 執行:
   python3 main_contest.py              有畫面 (練習用)
   python3 main_contest.py --no-ui      正式比賽
   再加 --practice                      練習模式: PICK_ORDER 用完自動從頭再來
-  再加 --robot-ip 192.168.0.1        臨時指定安川 IP (平常改 arm_link.py 的 HOST 即可)
 
-啟動後先拍快照 (手臂勿在畫面內), 終端印出「階段二」與「[arm] 已連上安川」之後才按手臂。
+啟動後先拍快照 (手臂勿在畫面內), 終端印出「階段二」(以及 arm_link 的連線訊息, 若有) 之後才按手臂。
 有畫面時的熱鍵: r = 重拍快照   c = 取用順序歸零   q = 離開
 """
 import time
@@ -37,7 +35,7 @@ from affine_transform import pixel_to_arm
 from pi_gpio_controller import PiGPIOController, IO_CODES
 
 # ======= 學生作答區: 隨機位置放置板上物件的夾取順序 (b 通道, 填顏色名) =======
-# 手臂每要一次座標 (B001=1) 就給下一個顏色; 同色兩件就寫兩次 (畫面由左到右給)。
+# 手臂每要一次座標就給下一個顏色; 同色兩件就寫兩次 (畫面由左到右給)。
 # 顏色名要和 vision_profiles.json 存的名稱一樣 (小寫)。
 PICK_ORDER = ["red", "blue", "green"]
 # ================================================================
@@ -93,7 +91,7 @@ class ChannelA:
 
 
 class ChannelB:
-    """b 通道 (隨機位置放置板): 開場拍一張快照算好每件的座標, 之後手臂每要一次座標 (B001=1) 就查表寫進 P001。"""
+    """b 通道 (隨機位置放置板): 開場拍一張快照算好每件的座標, 之後手臂每要一次座標 (arm_link 轉成 GET) 就查表回座標。"""
 
     def __init__(self, cap, profiles, practice):
         self.cap = cap
@@ -128,7 +126,7 @@ class ChannelB:
             s["served"] = False
 
     def handle(self, cmd):
-        """處理手臂的一句話, 回傳要回的回覆 (格式由 arm_link 決定)。"""
+        """處理 arm_link 轉來的指令字, 回傳要回的回覆 (送到手臂的格式由 arm_link 決定)。"""
         if cmd == arm_link.CMD_GET:
             if self.order_i >= len(PICK_ORDER):
                 if not self.practice:
@@ -155,8 +153,8 @@ class ChannelB:
         return arm_link.REPLY_OK                    # GRIP / RELEASE: 回 OK 就好
 
 
-def draw(frame, a, b, link):
-    """練習畫面: 快照裡的每件 + 狀態列 (含安川連線狀態)。"""
+def draw(frame, a, b):
+    """練習畫面: 快照裡的每件 + 狀態列。"""
     view = frame.copy()
     for i, s in enumerate(b.items):
         c = (120, 120, 120) if s["served"] else (0, 220, 0)
@@ -164,10 +162,8 @@ def draw(frame, a, b, link):
         cv2.drawMarker(view, p, c, cv2.MARKER_CROSS, 16, 2)
         cv2.putText(view, f"#{i}{s['color']}", (p[0] + 8, p[1] - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.5, c, 2)
     nxt = PICK_ORDER[b.order_i] if b.order_i < len(PICK_ORDER) else "-"
-    cv2.putText(view, f"A:{a.state} {a.note}    B: next={nxt}    YRC:{link.state} sent={link.served}",
-                (8, 24), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-    if link.note:                                   # 安川最近一句訊息 (含錯誤碼說明)
-        cv2.putText(view, link.note[:80], (8, 48), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 200, 255), 2)
+    cv2.putText(view, f"A:{a.state} {a.note}    B: next={nxt}", (8, 24),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
     cv2.putText(view, "r=re-snapshot  c=reset  q=quit", (8, view.shape[0] - 12),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
     return view
@@ -177,10 +173,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--no-ui", action="store_true", help="不開畫面 (正式比賽)")
     parser.add_argument("--practice", action="store_true", help="練習模式: PICK_ORDER 用完自動從頭再來")
-    parser.add_argument("--robot-ip", default=arm_link.HOST, help=f"安川控制器 IP (預設 {arm_link.HOST})")
-    parser.add_argument("--robot-port", type=int, default=arm_link.PORT, help=f"安川控制器埠 (預設 {arm_link.PORT})")
     args = parser.parse_args()
-    arm_link.HOST, arm_link.PORT = args.robot_ip, args.robot_port
 
     try:
         profiles = load_profiles(PROFILES_FILE)
@@ -205,7 +198,6 @@ def main():
         link.open()                                 # 快照完成才開始和手臂講話
         print(f"[main] === 階段二: 可以按手臂了 ({arm_link.HOST}:{arm_link.PORT})"
               + ("  [練習模式]" if args.practice else "") + " ===")
-        print("[main] (等終端印出「[arm] 已連上安川」再按手臂; 若印錯誤碼 2100 → 安川的 CMD REMOTE SEL 或 mode key 沒開)")
 
         if not args.no_ui:
             # 先用 WINDOW_NORMAL 建視窗, 使用者才能拖邊框改大小 (直接 imshow 會變成不能改的 AUTOSIZE)
@@ -223,7 +215,7 @@ def main():
                     running = False
             if args.no_ui:
                 continue
-            cv2.imshow("contest", draw(frame, a, b, link))
+            cv2.imshow("contest", draw(frame, a, b))
             key = cv2.waitKey(1) & 0xFF
             if key == ord('r'):
                 b.take_snapshot()

@@ -1,0 +1,47 @@
+工科賽 2026 樹莓派程式 母版結構
+====================================
+
+contest_2026_v10_<廠商>/
+├── main_contest.py
+├── pi_gpio_controller.py
+├── io_test.py
+├── affine_transform.py
+├── affine_sample_tool.py
+├── color_detect.py
+├── camera_config.py
+├── vision_tuner.py
+├── requirements_pi.txt
+├── arm_link.py
+├── arm_link_test_<廠商>.py
+├── README_student.md
+└── docs/
+    ├── a_channel_flow.txt
+    └── <手臂端程式或介面說明>
+
+共用檔案（四家 byte 相同，廠商不得修改）
+----------------------------------------
+main_contest.py
+pi_gpio_controller.py
+io_test.py
+affine_transform.py
+affine_sample_tool.py
+color_detect.py
+camera_config.py
+vision_tuner.py
+requirements_pi.txt
+
+廠商可改動的檔案（內容不限制）
+----------------
+arm_link.py
+arm_link_test_<廠商>.py
+README_student.md
+docs/a_channel_flow.txt
+docs/<手臂端程式或介面說明>
+
+arm_link.py 必須提供（main_contest.py 會用到）
+--------------------
+HOST, PORT
+CMD_GET, CMD_SCAN, CMD_GRIP, CMD_RELEASE, CMD_RESET, CMD_QUIT
+REPLY_OK, REPLY_BYE, REPLY_NONE
+reply_target(x, y), reply_count(n)
+class ArmLink: open(), poll(), send(text), close()

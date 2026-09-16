@@ -1,4 +1,7 @@
-# 樹莓派套件清單 (整合包實際 import: cv2 / numpy / GPIO)
+# 樹莓派套件清單 (四家共用; 程式實際 import: cv2 / numpy / GPIO / pymodbus)
+# 安裝 (樹莓派要先接上可上網的 Wi-Fi, 裝完再切回有線連手臂):
+#   pip install -r requirements_pi.txt --break-system-packages
 numpy>=2.0.2
 opencv-python>=4.11.0.86
-rpi-lgpio ; platform_machine in "armv7l aarch64"
+rpi-lgpio ; platform_machine in "armv7l aarch64"    # pi_gpio_controller.py 的繼電器與 ready 腳 (四家都用)
+pymodbus>=3.10,<4                                     # 只有 FANUC 的 arm_link.py 會 import; 其他家裝了無害
