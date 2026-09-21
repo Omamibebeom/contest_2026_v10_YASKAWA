@@ -4,4 +4,4 @@
 numpy>=2.0.2
 opencv-python>=4.11.0.86
 rpi-lgpio ; platform_machine in "armv7l aarch64"    # pi_gpio_controller.py 的繼電器與 ready 腳 (四家都用)
-pymodbus 3.9.2
+pymodbus==3.9.2
