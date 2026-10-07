@@ -1,0 +1,63 @@
+工科賽 2026 樹莓派程式 母版結構（2026-10-07）
+====================================
+
+contest_2026_v10_<廠商>/
+├── main_contest.py          ┐
+├── pi_gpio_controller.py    │
+├── io_test.py               │
+├── affine_transform.py      │
+├── affine_sample_tool.py    │ 共用檔 9 個：四家 byte 相同，廠商不得修改
+├── color_detect.py          │
+├── camera_config.py         │
+├── vision_tuner.py          │
+├── requirements_pi.txt      ┘
+├── arm_link.py              ┐
+├── arm_link_test_<廠商>.py  │ 廠商檔：內容不限制
+├── README_student.md        ┘
+├── <廠商新增的通訊程式>.py  可自行新增：限與手臂通訊有關（規則見第三節）
+└── docs/
+    ├── a_channel_flow.txt
+    └── <手臂端程式或介面說明>
+
+
+一、共用檔案（四家 byte 相同，廠商不得修改；校驗值見 共用檔_sha256.txt）
+----------------------------------------
+main_contest.py
+pi_gpio_controller.py
+io_test.py
+affine_transform.py
+affine_sample_tool.py
+color_detect.py
+camera_config.py
+vision_tuner.py
+requirements_pi.txt
+
+
+二、廠商可改動的檔案（內容不限制）
+----------------------------------------
+arm_link.py
+arm_link_test_<廠商>.py
+README_student.md
+docs/a_channel_flow.txt
+docs/<手臂端程式或介面說明>
+
+
+三、廠商可新增的檔案（限與手臂通訊有關）
+----------------------------------------
+可以新增的兩種：
+  1. 通訊測試程式：不開相機，單獨驗證樹莓派與手臂之間的連線、位址對照、交握流程
+                   （賽前驗證用，正式比賽不執行）
+  2. 通訊函式庫：  arm_link.py 會 import 的通訊協定模組
+
+不可新增：
+  與通訊無關的程式，例如視覺辨識、座標轉換、顏色編碼。
+  這些功能在共用檔裡，四家必須相同。
+
+
+四、arm_link.py 必須提供（main_contest.py 會用到）
+----------------------------------------
+HOST, PORT
+CMD_GET, CMD_SCAN, CMD_GRIP, CMD_RELEASE, CMD_RESET, CMD_QUIT
+REPLY_OK, REPLY_BYE, REPLY_NONE
+reply_target(x, y), reply_count(n)
+class ArmLink: open(), poll(), send(text), close()

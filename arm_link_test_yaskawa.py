@@ -1,5 +1,5 @@
 """
-arm_link_test_yaskawa.py —— 只測「樹莓派 ↔ 安川 YRC1000」的通訊 (廠商測機用)
+arm_link_test_yaskawa.py —— 只測「樹莓派 ↔ 安川 YRC1000」的通訊
 
 跟比賽主程式的差別
   不開相機、不讀 vision_profiles.json、不碰 GPIO、不做座標轉換。
@@ -14,9 +14,8 @@ arm_link_test_yaskawa.py —— 只測「樹莓派 ↔ 安川 YRC1000」的通�
   再加 --host 192.168.0.1                       臨時指定控制器 IP (不改 arm_link.py)
 
 跑之前控制器要先設定好 (詳見 docs/yaskawa_job_interface.txt 第一節)
-  1. ETHERNET SERVER 功能開啟
-  2. CMD REMOTE SEL 啟用, 且 pendant 的 mode key 轉到 REMOTE
-  兩項少做一項, 終端會印「錯誤碼 2100」。
+  1. High Speed Ethernet Server 功能開啟 (UDP 埠 10040); pendant 任何模式都可以, 不需要 REMOTE
+  2. P001 先在 pendant 教成直角座標的夾取姿態點 (程式寫座標時只換 X Y Z, 其餘欄位沿用 P001)
 
 注意: 寫進 P001 / P002 的是真的座標, job 會真的把手臂移過去。
       FAKE_TARGETS 請填這台手臂上安全、確定到得了的點。
@@ -42,7 +41,7 @@ def selftest():
     print(f"[自我測試] 目標 {arm_link.HOST}:{arm_link.PORT}")
     arm = arm_link._Yaskawa(arm_link.HOST, arm_link.PORT)
     try:
-        # 1. 讀 B001: 連線、Ethernet Server、command remote 三件事一次驗完
+        # 1. 讀 B001: 連線與 High Speed Ethernet Server 一次驗完
         value = arm.read_byte(arm_link.FLAG_VAR)
         print(f"  [1/3] 讀 B{arm_link.FLAG_VAR:03d} = {value}   → 連線正常")
 
@@ -50,14 +49,14 @@ def selftest():
         arm.write_byte(arm_link.STATUS_VAR, 0)
         print(f"  [2/3] 寫 B{arm_link.STATUS_VAR:03d} = 0        → 寫入正常")
 
-        # 3. 寫 P001: 驗證位置變數格式 (座標系 / 姿態 / Tool 有沒有填對)
+        # 3. 寫 P001: 先讀現值再只換 X Y Z (P001 要先教成直角座標點, 否則這裡會報「脈衝型」)
         x, y = FAKE_TARGETS[0] if FAKE_TARGETS else (0.0, 0.0)
         arm.write_position(arm_link.PICK_P, x, y, arm_link.Z_PICK)
         print(f"  [3/3] 寫 P{arm_link.PICK_P:03d} = ({x}, {y}, {arm_link.Z_PICK})")
         print(f"\n  三項都過。請在 pendant 上看 P{arm_link.PICK_P:03d}, 數字應該和上面一樣。")
     except (OSError, ValueError, arm_link.ArmError) as e:
         print(f"\n  失敗: {e}")
-        print("  對照 docs/yaskawa_job_interface.txt 第六節「常見問題」。")
+        print("  對照 docs/yaskawa_job_interface.txt 第七節「常見問題」。")
     finally:
         arm.close()
 
